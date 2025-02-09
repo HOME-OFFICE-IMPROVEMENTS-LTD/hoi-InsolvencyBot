@@ -15,7 +15,16 @@ import re
 import pandas as pd
 import requests
 
-SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'insolvency_bot_with_gpt-3.5-turbo', 'insolvency_bot_with_gpt-4', 'insolvency_bot_with_gpt-4o'}
+SUPPORTED_MODELS = {
+'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gemini-2.0-pro-exp-02-05',
+ 'claude-3-5-sonnet-20241022',
+ 'deepseek-chat',
+ 'llama3.1-70b',
+ 'insolvency_bot_with_gpt-3.5-turbo', 'insolvency_bot_with_gpt-4', 'insolvency_bot_with_gpt-4o',
+ 'insolvency_bot_with_gemini-2.0-pro-exp-02-05',
+ 'insolvency_bot_with_claude-3-5-sonnet-20241022',
+ 'insolvency_bot_with_deepseek-chat',
+ 'insolvency_bot_with_llama3.1-70b'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
 COMMAND_LINE_PARAM = f"Usage: python evaluate_bot_responses_with_mark_scheme.py {SUPPORTED_MODELS_CONCAT} train|test"
 

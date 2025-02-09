@@ -1,7 +1,7 @@
 '''
-Run all train or test questions through Insolvency Bot
+Run all train or test questions through GPT-3-5 Turbo or GPT-4
 
-Usage: python generate_responses_insolvency_bot.py gpt-3.5-turbo|gpt-4 train|test
+Usage: python generate_responses_gpt.py gpt-3.5-turbo|gpt-4 train|test
 
 You need to set environment variable OPENAI_API_KEY first.
 '''
@@ -11,23 +11,29 @@ import re
 import sys
 import time
 import traceback
+
 import pandas as pd
 import requests
-sys.path.append("../insolvency/")
-from insolvency_bot import answer_question
 
-SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gemini-2.0-pro-exp-02-05', 'claude-3-5-sonnet-20241022', 'deepseek-chat', 'llama3.1-70b'}
+from openai import OpenAI
+
+SUPPORTED_MODELS = {'llama3.1-70b'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
-COMMAND_LINE_PARAM = f"Usage: python generate_responses_insolvency_bot.py {SUPPORTED_MODELS_CONCAT} train|test"
+COMMAND_LINE_PARAM = f"Usage: python generate_responses_llama.py {SUPPORTED_MODELS_CONCAT} train|test"
 
 if len(sys.argv) != 3:
     print(COMMAND_LINE_PARAM)
     exit()
 
-if os.environ.get("OPENAI_API_KEY") == "" or os.environ.get("OPENAI_API_KEY") is None:
-    print("Please set environment variable OPENAI_API_KEY first.")
+if os.environ.get("LLAMA_API_TOKEN") == "" or os.environ.get("LLAMA_API_TOKEN") is None:
+    print("Please set environment variable LLAMA_API_TOKEN first.")
     exit()
 
+client = OpenAI(
+api_key = os.environ.get("LLAMA_API_TOKEN"),
+base_url = "https://api.llama-api.com"
+)
+    
 MODEL = sys.argv[1]
 if MODEL not in SUPPORTED_MODELS:
     print(COMMAND_LINE_PARAM)
@@ -47,9 +53,6 @@ headers = {
 bot_responses = [""] * len(df)
 bot_times = [0] * len(df)
 bot_attempts = [0] * len(df)
-bot_statutes = [""] * len(df)
-bot_cases = [""] * len(df)
-bot_forms = [""] * len(df)
 for idx in range(len(df)):
     q = df.question_text.iloc[idx]
     q_no = df.question_no.iloc[idx]
@@ -57,36 +60,38 @@ for idx in range(len(df)):
 
     starttime = time.time()
 
+    json_data = {
+        'model': MODEL,
+        'messages': [
+            {"role": "user", "content": q},
+        ],
+    }
     for attempt in range(3):
         print("attempt calling GPT API:", attempt)
         try:
-            insolvency_bot_response_json = answer_question(q, False, MODEL)
-            r = insolvency_bot_response_json["_response"]
-            statutes = "|".join(insolvency_bot_response_json["legislation"])
-            cases = "|".join(insolvency_bot_response_json["cases"])
-            forms = "|".join(insolvency_bot_response_json["forms"])
+            
+            response = client.chat.completions.create(
+                model="llama3.1-70b",
+                messages=[
+                    {"role": "user", "content": q},
+                ]
+            )
+            r = response.choices[0].message.content
             break
         except:
             print("Try again")
             traceback.print_exc()
             time.sleep(10)
-
     bot_responses[idx] = re.sub(r'\s+', ' ', r)
 
     endtime = time.time()
     bot_times[idx] = endtime - starttime
     bot_attempts[idx] = attempt + 1
-    bot_statutes[idx] = statutes
-    bot_cases[idx] = cases
-    bot_forms[idx] = forms
 
     print("\tReceived response: ", r)
 
 df["bot_response"] = bot_responses
 df["bot_response_time"] = bot_times
 df["bot_response_attempts"] = bot_attempts
-df["bot_statutes"] = bot_statutes
-df["bot_cases"] = bot_cases
-df["bot_forms"] = bot_forms
 
-df.to_csv(f"output_{TRAIN_TEST}_insolvency_bot_with_{MODEL}.csv", sep="\t", encoding="utf-8", index=False)
+df.to_csv(f"output_{TRAIN_TEST}_{MODEL}.csv", sep="\t", encoding="utf-8", index=False)
