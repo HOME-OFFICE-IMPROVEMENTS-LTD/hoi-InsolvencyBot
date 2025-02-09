@@ -70,6 +70,8 @@ for idx in range(len(df)):
             print("Try again")
             traceback.print_exc()
             time.sleep(10)
+            if "llama" in MODEL:
+                time.sleep(50)
 
     bot_responses[idx] = re.sub(r'\s+', ' ', r)
 

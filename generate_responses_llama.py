@@ -31,7 +31,8 @@ if os.environ.get("LLAMA_API_TOKEN") == "" or os.environ.get("LLAMA_API_TOKEN") 
 
 client = OpenAI(
 api_key = os.environ.get("LLAMA_API_TOKEN"),
-base_url = "https://api.llama-api.com"
+base_url = "https://api.llama-api.com",
+timeout = 60 * 4
 )
     
 MODEL = sys.argv[1]
@@ -67,7 +68,7 @@ for idx in range(len(df)):
         ],
     }
     for attempt in range(3):
-        print("attempt calling GPT API:", attempt)
+        print("attempt calling Llama API:", attempt)
         try:
             
             response = client.chat.completions.create(
@@ -81,7 +82,7 @@ for idx in range(len(df)):
         except:
             print("Try again")
             traceback.print_exc()
-            time.sleep(10)
+            time.sleep(60)
     bot_responses[idx] = re.sub(r'\s+', ' ', r)
 
     endtime = time.time()
