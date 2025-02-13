@@ -16,7 +16,7 @@ import requests
 sys.path.append("../insolvency/")
 from insolvency_bot import answer_question
 
-SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gemini-2.0-pro-exp-02-05', 'claude-3-5-sonnet-20241022', 'deepseek-chat', 'llama3.1-70b'}
+SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gemini-2.0-pro-exp-02-05', 'claude-3-5-sonnet-20241022', 'deepseek-chat', 'llama3.1-70b', 'DeepSeek-R1', 'Mistral-Large-2411'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
 COMMAND_LINE_PARAM = f"Usage: python generate_responses_insolvency_bot.py {SUPPORTED_MODELS_CONCAT} train|test"
 
@@ -57,7 +57,7 @@ for idx in range(len(df)):
 
     starttime = time.time()
 
-    for attempt in range(3):
+    for attempt in range(5):
         print("attempt calling GPT API:", attempt)
         try:
             insolvency_bot_response_json = answer_question(q, False, MODEL)
@@ -70,7 +70,7 @@ for idx in range(len(df)):
             print("Try again")
             traceback.print_exc()
             time.sleep(10)
-            if "llama" in MODEL:
+            if "llama" in MODEL or "DeepSeek" in MODEL or "Mistral" in MODEL:
                 time.sleep(50)
 
     bot_responses[idx] = re.sub(r'\s+', ' ', r)
@@ -83,6 +83,9 @@ for idx in range(len(df)):
     bot_forms[idx] = forms
 
     print("\tReceived response: ", r)
+    
+    if "llama" in MODEL or "DeepSeek" in MODEL or "Mistral" in MODEL:
+        time.sleep(130)
 
 df["bot_response"] = bot_responses
 df["bot_response_time"] = bot_times

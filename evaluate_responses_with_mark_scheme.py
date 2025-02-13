@@ -24,7 +24,13 @@ SUPPORTED_MODELS = {
  'insolvency_bot_with_gemini-2.0-pro-exp-02-05',
  'insolvency_bot_with_claude-3-5-sonnet-20241022',
  'insolvency_bot_with_deepseek-chat',
- 'insolvency_bot_with_llama3.1-70b'}
+ 'insolvency_bot_with_llama3.1-70b',
+ 
+ 'DeepSeek-R1',
+ 'insolvency_bot_with_DeepSeek-R1',
+ 'Mistral-Large-2411',
+ 'insolvency_bot_with_Mistral-Large-2411',
+}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
 COMMAND_LINE_PARAM = f"Usage: python evaluate_bot_responses_with_mark_scheme.py {SUPPORTED_MODELS_CONCAT} train|test"
 

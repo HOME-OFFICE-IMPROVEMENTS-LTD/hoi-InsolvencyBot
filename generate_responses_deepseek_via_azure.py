@@ -3,7 +3,7 @@ Run all train or test questions through GPT-3-5 Turbo or GPT-4
 
 Usage: python generate_responses_gpt.py gpt-3.5-turbo|gpt-4 train|test
 
-You need to set environment variable OPENAI_API_KEY first.
+You need to set environment variable AZUREAI_ENDPOINT_KEY first.
 '''
 
 import os
@@ -15,25 +15,25 @@ import traceback
 import pandas as pd
 import requests
 
-from openai import OpenAI
+from azure.ai.inference import ChatCompletionsClient
+from azure.ai.inference.models import SystemMessage, UserMessage
+from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 
-SUPPORTED_MODELS = {'llama3.1-70b'}
+
+SUPPORTED_MODELS = {'DeepSeek-R1', 'Mistral-Large-2411'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
-COMMAND_LINE_PARAM = f"Usage: python generate_responses_llama.py {SUPPORTED_MODELS_CONCAT} train|test"
+COMMAND_LINE_PARAM = f"Usage: python generate_responses_deepseek_via_azure.py {SUPPORTED_MODELS_CONCAT} train|test"
 
 if len(sys.argv) != 3:
     print(COMMAND_LINE_PARAM)
     exit()
 
-if os.environ.get("LLAMA_API_TOKEN") == "" or os.environ.get("LLAMA_API_TOKEN") is None:
-    print("Please set environment variable LLAMA_API_TOKEN first.")
+if os.environ.get("AZUREAI_ENDPOINT_KEY") == "" or os.environ.get("AZUREAI_ENDPOINT_KEY") is None:
+    print("Please set environment variable AZUREAI_ENDPOINT_KEY first.")
     exit()
+    
 
-client = OpenAI(
-api_key = os.environ.get("LLAMA_API_TOKEN"),
-base_url = "https://api.llama-api.com",
-timeout = 60 * 4
-)
     
 MODEL = sys.argv[1]
 if MODEL not in SUPPORTED_MODELS:
@@ -46,10 +46,10 @@ print(f"Dataset: {TRAIN_TEST}")
 
 df = pd.read_csv(f"{TRAIN_TEST}_questions.csv", encoding="utf-8", sep="\t")
 
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + os.environ["OPENAI_API_KEY"],
-}
+
+endpoint = "https://ai-thomas3695ai924177264380.services.ai.azure.com/models"
+model_name = "DeepSeek-R1"
+client = ChatCompletionsClient(endpoint=endpoint, credential=AzureKeyCredential(os.environ["AZUREAI_ENDPOINT_KEY"]), timeout=60*5)
 
 bot_responses = [""] * len(df)
 bot_times = [0] * len(df)
@@ -68,23 +68,21 @@ for idx in range(len(df)):
         ],
     }
     for attempt in range(3):
-        print("attempt calling Llama API:", attempt)
+        print("attempt calling Azure AI Foundry API:", attempt)
         try:
-            
-            response = client.chat.completions.create(
-                model="llama3.1-70b",
-                messages=[
-                    {"role": "user", "content": q},
-                ],
-                max_tokens = 2000,
-                temperature = 0
-            )
+            response = client.complete(
+		  messages=[
+		    UserMessage(content=q)
+		  ],
+		  model = model_name,
+		  max_tokens=2000
+		)
             r = response.choices[0].message.content
             break
         except:
             print("Try again")
             traceback.print_exc()
-            time.sleep(60)
+            time.sleep(10)
     bot_responses[idx] = re.sub(r'\s+', ' ', r)
 
     endtime = time.time()
