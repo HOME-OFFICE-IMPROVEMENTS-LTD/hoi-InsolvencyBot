@@ -16,7 +16,7 @@ import pandas as pd
 import requests
 
 SUPPORTED_MODELS = {
-'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gemini-2.0-pro-exp-02-05',
+'gpt-3.5-turbo', 'gpt-4', 'gpt-4o', 'gpt-4.5-preview-2025-02-27', 'gemini-2.0-pro-exp-02-05',
  'claude-3-5-sonnet-20241022',
  'deepseek-chat',
  'llama3.1-70b',
