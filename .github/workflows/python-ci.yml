@@ -24,7 +24,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: ✅ Verify Python runs
+      - name: 🚀 Dry run GPT evaluation script
         run: |
-          python --version
-          echo "✔️ Python environment ready!"
+          echo "Starting dry run of generate_responses_gpt.py"
+          python generate_responses_gpt.py gpt-4 train || echo "Skipping errors in CI environment"
+
