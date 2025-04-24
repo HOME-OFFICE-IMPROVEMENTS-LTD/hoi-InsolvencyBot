@@ -136,5 +136,5 @@ This project supports a reproducible development environment using **VS Code Dev
 - Easy team onboarding
 - No "works on my machine" issues
 
-👉 [Read full setup instructions in the Wiki](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot/wiki/devcontainer-setup)
+👉 [Read full setup instructions in the Wiki](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot/wiki/Devcontainer-Setup)
 
