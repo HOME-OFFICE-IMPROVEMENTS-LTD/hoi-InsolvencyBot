@@ -127,3 +127,14 @@ These scripts run all of the above commands.
 # Generating graphs
 
 You can generate the graphs in the paper by running `GenerateSummaryGraphs.ipynb` which will read the results files `scores_***.csv`.
+
+
+## 💻 Collaborative Dev Setup (VS Code Dev Container)
+
+This project supports a reproducible development environment using **VS Code Dev Containers**. It ensures:
+- Consistent Python + dependency versions
+- Easy team onboarding
+- No "works on my machine" issues
+
+👉 [Read full setup instructions in the Wiki](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot/wiki/devcontainer-setup)
+
