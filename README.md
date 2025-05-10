@@ -9,6 +9,8 @@
 
 # Insolvency evaluation scripts
 
+![Tests](https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot/actions/workflows/python-tests.yml/badge.svg)
+
 
 You can try the insolvency bot at https://fastdatascience.com/insolvency
 
@@ -21,6 +23,77 @@ Read the long version of our paper (pending publication) here:
 
 
 All bot responses to the training and test questions are in [all_responses_test.md](all_responses_test.md) and [all_responses_train.md](all_responses_train.md).
+
+## Requirements
+
+- Python 3.11+
+- pip (Python package manager)
+- OpenAI API key (set as environment variable `OPENAI_API_KEY`)
+
+## Project Structure
+
+```
+hoi-InsolvencyBot/
+├── data/                     # Input data directory
+│   ├── train_questions.csv   # Training dataset questions
+│   └── test_questions.csv    # Test dataset questions
+├── src/                      # Source code
+│   └── hoi_insolvencybot/    # Main package
+│       ├── __init__.py       # Package initialization
+│       ├── __main__.py       # Entry point
+│       └── insolvency_bot.py # Core bot logic
+├── output_*.csv              # Model response output files
+├── scores_*.csv              # Evaluation score files
+├── *_mark_scheme.csv         # Marking criteria
+├── *_gold_standard.csv       # Reference answers
+└── *.ipynb                   # Analysis notebooks
+```
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot.git
+cd hoi-InsolvencyBot
+
+# Set up a virtual environment (optional but recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your OpenAI API key
+```
+
+## How to Run
+
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Set your OpenAI API key:
+   ```bash
+   export OPENAI_API_KEY=your-key-here
+   ```
+3. Run the GPT script:
+   ```bash
+   python generate_responses_gpt.py gpt-4 train
+   # or
+   python generate_responses_gpt.py gpt-4 test
+   ```
+4. Run the Insolvency Bot script:
+   ```bash
+   python -m hoi_insolvencybot gpt-4 train
+   # or
+   python -m hoi_insolvencybot gpt-4 test
+   ```
+
+## Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
 ## Training questions
 
@@ -127,3 +200,249 @@ These scripts run all of the above commands.
 # Generating graphs
 
 You can generate the graphs in the paper by running `GenerateSummaryGraphs.ipynb` which will read the results files `scores_***.csv`.
+
+## 💻 Development and Usage
+
+### Available Tools
+
+This project provides several tools for interacting with InsolvencyBot:
+
+| Tool | Description | Command |
+|------|-------------|---------|
+| **Web Demo** | Interactive web interface | `make web` or `./run_app.sh` |
+| **API Server** | FastAPI-based REST API with Swagger docs | `make api` or `./run_api.sh` |
+| **CLI** | Command-line interactive interface | `make cli` or `./run_cli.sh` |
+| **Benchmarking** | Performance benchmarking tool | `make benchmark` or `./run_benchmark.sh` |
+| **Tests** | Run test suite with coverage | `make test` or `./run_tests.sh` |
+| **Documentation** | Generate API documentation | `make docs` or `python generate_docs.py` |
+
+### Using the API
+
+The API server provides a REST interface with Swagger documentation. Start it with:
+
+```bash
+make api
+# or
+./run_api.sh
+```
+
+Then open `http://localhost:8000/docs` in your browser to see and test the API.
+
+Example API usage with Python:
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/ask",
+    json={
+        "question": "What happens if my company can't pay its debts?",
+        "model": "gpt-3.5-turbo"
+    }
+)
+
+result = response.json()
+print(result["response"])
+print("Legislation:", result["legislation"])
+print("Cases:", result["cases"])
+```
+
+For full API documentation, see [API_DOCUMENTATION.md](API_DOCUMENTATION.md) or the [docs/](docs/) directory.
+
+### Docker Support
+
+Run the entire stack with Docker Compose:
+
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY=your-key-here
+
+# Start all services
+docker-compose up
+```
+
+This will start the API server, web interface, and CLI in containers.
+
+### Code Quality
+
+The project uses pre-commit hooks to ensure code quality. Install them with:
+
+```bash
+./install_hooks.sh
+```
+
+These hooks will automatically check your code for:
+- Proper formatting with black
+- Linting issues with flake8
+- Passing tests
+
+## Using InsolvencyBot API
+
+InsolvencyBot can be used as an API service, allowing you to integrate it with your own applications.
+
+### Starting the API Server
+
+```bash
+# Make sure your OpenAI API key is set
+export OPENAI_API_KEY=your-key-here
+
+# Option 1: Using the convenience script
+./run_api.sh
+
+# Option 2: Using Makefile
+make api
+
+# Option 3: Using Docker
+docker-compose up api
+```
+
+The API server will start on port 8000 by default. You can access the OpenAPI documentation at `http://localhost:8000/docs`.
+
+### API Authentication
+
+For production deployment, you can enable API key authentication:
+
+```bash
+export INSOLVENCYBOT_API_KEY=your-api-key
+```
+
+Clients will then need to include this key in the `api-key` header when making requests.
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET    | /        | Get API information |
+| GET    | /models  | List available models |
+| POST   | /ask     | Process a legal question |
+
+### Example API Usage
+
+Using cURL:
+```bash
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What happens if my company can'\''t pay its debts?", "model": "gpt-3.5-turbo"}'
+```
+
+Using Python:
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/ask",
+    json={
+        "question": "What happens if my company can't pay its debts?",
+        "model": "gpt-3.5-turbo"
+    }
+)
+
+result = response.json()
+print(result["response"])
+print("Legislation:", result["legislation"])
+print("Cases:", result["cases"])
+```
+
+See [API_DOCUMENTATION.md](API_DOCUMENTATION.md) for complete API documentation and [docs/api_examples.md](docs/api_examples.md) for more usage examples.
+
+## Other Available Tools
+
+In addition to the API, InsolvencyBot provides several other tools:
+
+### Interactive CLI
+
+For command-line interaction with InsolvencyBot:
+
+```bash
+./run_cli.sh
+# or
+make cli
+```
+
+### Web Interface
+
+For a browser-based interface:
+
+```bash
+./run_app.sh
+# or
+make web
+```
+
+### Performance Benchmarking
+
+To benchmark model performance:
+
+```bash
+./run_benchmark.sh
+# or
+make benchmark
+```
+
+### Testing and Coverage
+
+To run tests and generate coverage reports:
+
+```bash
+make test
+make report
+```
+
+### Architecture Documentation
+
+To better understand the system architecture, refer to [docs/architecture.md](docs/architecture.md) and view the diagrams in the `docs` directory.
+
+### System Monitoring and Status
+
+InsolvencyBot now includes comprehensive system monitoring and health check capabilities:
+
+#### Status Page
+
+Access the system status dashboard at `http://localhost:5000/status` when the web interface is running. This page provides:
+
+- Real-time API connectivity status
+- Web interface information
+- System metrics (CPU, memory, disk usage)
+- API usage statistics
+- Environment details
+
+The status page automatically refreshes every 30 seconds to provide up-to-date monitoring.
+
+#### API Diagnostic Endpoint
+
+The API provides a diagnostic endpoint for system health monitoring:
+
+```bash
+# Get detailed system diagnostics (requires API key if authentication is enabled)
+curl -H "api-key: your-api-key" http://localhost:8000/diagnostic
+```
+
+This returns comprehensive system information including:
+- API version and uptime
+- Environment configuration
+- System resources (CPU, memory, disk)
+- Usage metrics and model statistics
+
+#### Status Check Script
+
+A convenience script is provided to check the status of all services from the terminal:
+
+```bash
+./check_status.sh
+```
+
+This script performs connectivity tests and displays the health of both the API server and web interface.
+
+#### Unified System Script
+
+To run the complete system (API + Web Interface) with a single command:
+
+```bash
+./run_system.sh
+```
+
+This script will:
+1. Start the API server
+2. Start the web interface
+3. Provide URLs for accessing all components
+4. Handle graceful shutdown of all services with Ctrl+C
