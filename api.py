@@ -27,6 +27,9 @@ from src.hoi_insolvencybot.logging_config import setup_logging, get_logger
 from src.hoi_insolvencybot.config import config
 from src.hoi_insolvencybot.monitoring import RequestTracker, metrics as tracker
 
+# Import health and diagnostic endpoints
+from api_health import health_router, TrackRequestsMiddleware
+
 # Set up logging
 setup_logging()
 logger = get_logger(__name__)
@@ -64,6 +67,12 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
+
+# Add the API health monitoring endpoints
+app.include_router(health_router, prefix="/api", tags=["Health & Diagnostics"])
+
+# Add middleware for tracking request metrics
+app.add_middleware(TrackRequestsMiddleware)
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Middleware for rate limiting API requests."""
@@ -122,7 +131,7 @@ class QuestionRequest(BaseModel):
         ...,
         title="Question",
         description="The insolvency-related legal question to process",
-        min_length=10,
+        min_length=2,
         example="What happens if my company can't pay its debts?"
     )
     model: ModelEnum = Field(
@@ -436,7 +445,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     error_count += 1
     
     # Add request to tracker for monitoring
-    tracker.track_error(request.url.path, str(exc))
+    tracker.record_error(status_code=500)
     
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -457,7 +466,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     error_count += 1
     
     # Add request to tracker for monitoring
-    tracker.track_error(request.url.path, f"{exc.status_code}: {exc.detail}")
+    tracker.record_error(status_code=exc.status_code)
     
     return JSONResponse(
         status_code=exc.status_code,

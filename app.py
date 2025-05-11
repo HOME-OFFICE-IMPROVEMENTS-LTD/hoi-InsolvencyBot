@@ -13,14 +13,128 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+# App startup timestamp
+import time
+app.config['START_TIME'] = time.time()
+app.config['REQUESTS_SERVED'] = 0
+
 # Get API configuration from environment variables
 API_URL = os.environ.get("INSOLVENCYBOT_API_URL", "http://localhost:8000")
 API_KEY = os.environ.get("INSOLVENCYBOT_API_KEY", "")
 
+@app.before_request
+def count_request():
+    """Increment the requests counter before processing each request."""
+    app.config['REQUESTS_SERVED'] += 1
+
+# Request middleware for tracking
+@app.before_request
+def before_request():
+    """Execute before each request to track metrics."""
+    app.config['REQUESTS_SERVED'] += 1
+    
+def format_uptime(seconds):
+    """
+    Format uptime seconds into a human-readable string.
+    
+    Args:
+        seconds: Uptime in seconds
+        
+    Returns:
+        str: Formatted uptime string (e.g. "2d 5h 30m 10s")
+    """
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    
+    return f"{int(days)}d {int(hours)}h {int(minutes)}m {int(seconds)}s"
+
 @app.route('/')
 def home():
     """Render the home page."""
-    return render_template('index.html')
+    # Determine which UI version to use based on environment variable
+    use_enhanced_ui = os.environ.get("INSOLVENCYBOT_USE_ENHANCED_UI", "true").lower() == "true"
+    template = 'improved_index.html' if use_enhanced_ui else 'index.html'
+    return render_template(template)
+
+@app.route('/status')
+def status():
+    """Render the system status page with diagnostic information."""
+    # Get API status
+    api_status = {"status": "unknown"}
+    try:
+        headers = {"Content-Type": "application/json"}
+        if API_KEY:
+            headers["api-key"] = API_KEY
+        
+        # Try to connect to the API
+        response = requests.get(f"{API_URL}/", headers=headers, timeout=5)
+        if response.status_code == 200:
+            api_status = {
+                "status": "online",
+                "version": response.json().get("version", "unknown"),
+                "response_time_ms": response.elapsed.total_seconds() * 1000,
+                "endpoint": API_URL
+            }
+        else:
+            api_status = {
+                "status": "error",
+                "status_code": response.status_code,
+                "response_time_ms": response.elapsed.total_seconds() * 1000,
+                "endpoint": API_URL
+            }
+    except Exception as e:
+        api_status = {
+            "status": "offline",
+            "error": str(e),
+            "endpoint": API_URL
+        }
+    
+    # Get web application status
+    import platform
+    import sys
+    import datetime
+    
+    # Calculate uptime
+    current_time = time.time()
+    uptime_seconds = int(current_time - app.config['START_TIME'])
+    uptime_formatted = format_uptime(uptime_seconds)
+    
+    web_status = {
+        "python_version": sys.version,
+        "platform": platform.platform(),
+        "uptime_seconds": uptime_seconds,
+        "uptime_formatted": uptime_formatted,
+        "requests_served": app.config['REQUESTS_SERVED']
+    }
+    
+    # Diagnostic information
+    import psutil
+    try:
+        process = psutil.Process(os.getpid())
+        memory_info = process.memory_info()
+        diagnostic = {
+            "memory_usage_mb": memory_info.rss / (1024 * 1024),
+            "cpu_percent": process.cpu_percent(interval=1.0),
+            "threads": process.num_threads(),
+            "disk_usage_percent": psutil.disk_usage('/').percent
+        }
+    except Exception:
+        # If psutil is not available or fails
+        diagnostic = {
+            "error": "Could not retrieve system information",
+            "recommendation": "Install psutil for better diagnostics"
+        }
+    
+    # Determine which UI version to use based on environment variable
+    use_enhanced_ui = os.environ.get("INSOLVENCYBOT_USE_ENHANCED_UI", "true").lower() == "true"
+    template = 'improved_status.html' if use_enhanced_ui else 'status.html'
+    
+    return render_template(template, 
+                          api_status=api_status,
+                          web_status=web_status,
+                          diagnostic=diagnostic,
+                          now=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
 @app.route('/api/ask', methods=['POST'])
 def ask():
@@ -77,7 +191,8 @@ def ask():
         
         # Convert the FastAPI response format to what the UI expects
         return jsonify({
-            "_response": result.get("response", ""),
+            "response": result.get("response", ""),
+            "_response": result.get("response", ""),  # For backward compatibility
             "legislation": result.get("legislation", []),
             "cases": result.get("cases", []),
             "forms": result.get("forms", [])
@@ -87,73 +202,36 @@ def ask():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/status')
-def status():
-    """System status page."""
-    api_status = {
-        "connected": False,
-        "models_available": False,
-        "authentication": "unknown",
-        "message": "API connection failed",
-        "error": None
-    }
-    
-    # Check API connection
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    """API endpoint to handle user feedback on responses."""
     try:
-        # Basic API connectivity check
-        headers = {}
-        if API_KEY:
-            headers["api-key"] = API_KEY
-            
-        response = requests.get(f"{API_URL}/", headers=headers, timeout=5)
-        if response.status_code == 200:
-            api_status["connected"] = True
-            api_status["message"] = "Connected to API"
-            
-            # Check models endpoint (requires authentication)
-            try:
-                models_response = requests.get(f"{API_URL}/models", headers=headers, timeout=5)
-                if models_response.status_code == 200:
-                    api_status["models_available"] = True
-                    models = models_response.json().get("models", [])
-                    api_status["models"] = [model["id"] for model in models]
-                    api_status["authentication"] = "working" if API_KEY else "not required"
-                elif models_response.status_code == 401:
-                    api_status["authentication"] = "failed"
-                    api_status["error"] = "Authentication required but failed"
-            except Exception as e:
-                api_status["error"] = f"Models endpoint error: {str(e)}"
-        else:
-            api_status["message"] = f"API returned status code {response.status_code}"
-            api_status["error"] = response.text
-    except requests.RequestException as e:
-        api_status["error"] = f"Connection error: {str(e)}"
+        data = request.json
+        feedback_type = data.get('feedback_type', '')
+        question = data.get('question', '')
+        model = data.get('model', '')
+        app.logger.info(f"Feedback received: {feedback_type} for question: '{question}' using model: {model}")
+        return jsonify({"status": "success", "message": "Feedback recorded"})
+    except Exception as e:
+        app.logger.error(f"Error processing feedback: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# Removed duplicate status route implementation and broken code
+
+def format_uptime(seconds):
+    """Convert seconds to a human-readable uptime format.
     
-    # Get diagnostic info from the API if possible
-    diagnostic = {}
-    if api_status["connected"] and api_status["authentication"] != "failed":
-        try:
-            diag_response = requests.get(f"{API_URL}/diagnostic", headers=headers, timeout=5)
-            if diag_response.status_code == 200:
-                diagnostic = diag_response.json()
-        except:
-            pass
+    Args:
+        seconds: The uptime in seconds
+        
+    Returns:
+        A string representation of the uptime (e.g., "2d 3h 45m 30s")
+    """
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
     
-    # Application information
-    web_status = {
-        "version": "1.0.0",
-        "started": os.environ.get("FLASK_START_TIME", "unknown"),
-        "api_url": API_URL,
-        "api_auth_enabled": bool(API_KEY),
-    }
-    
-    # Return status page with current time
-    from datetime import datetime
-    return render_template('status.html', 
-                          api_status=api_status,
-                          web_status=web_status,
-                          diagnostic=diagnostic,
-                          now=datetime.now())
+    return f"{int(days)}d {int(hours)}h {int(minutes)}m {int(seconds)}s"
 
 # Update the create_templates_folder function to also create the status.html template
 def create_templates_folder():
@@ -178,7 +256,7 @@ def create_templates_folder():
         }
         h1 {
             color: #333;
-            text-align: center;
+            text-align: center.
         }
         .container {
             display: flex;
