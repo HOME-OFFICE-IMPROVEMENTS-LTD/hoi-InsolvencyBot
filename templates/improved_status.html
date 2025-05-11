@@ -1,0 +1,227 @@
+<!-- Enhanced version of status.html with modern UI -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsolvencyBot - System Status</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <meta name="description" content="System status monitoring dashboard for the InsolvencyBot application.">
+    <meta http-equiv="refresh" content="60">
+    <style>
+        :root {
+            --refresh-progress: 0%;
+        }
+        .refresh-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--color-primary), var(--color-primary-light));
+            width: var(--refresh-progress);
+            z-index: 1000;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div id="refresh-progress-bar" class="refresh-progress-bar"></div>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="/" class="navbar-brand">
+                    <i class="bi bi-building"></i> InsolvencyBot
+                </a>
+                <ul class="navbar-nav">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/status" class="nav-link active">Status</a></li>
+                    <li><a href="https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot" target="_blank" class="nav-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="intro mt-8 mb-6">
+            <h1 class="text-center">System Status</h1>
+            <p class="text-center text-muted">Last updated: <span id="last-updated">{{ now }}</span></p>
+        </section>
+        
+        <section class="system-overview mb-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="bi bi-speedometer"></i> System Health Overview</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- API Status -->
+                        <div class="status-box">
+                            <h3 class="status-title">
+                                <i class="bi bi-hdd-rack"></i> API Status
+                            </h3>
+                            <div class="status-value">
+                                {% if api_status.status == 'online' %}
+                                <span class="badge badge-success"><i class="bi bi-check-circle"></i> Online</span>
+                                {% elif api_status.status == 'error' %}
+                                <span class="badge badge-warning"><i class="bi bi-exclamation-triangle"></i> Error</span>
+                                {% else %}
+                                <span class="badge badge-error"><i class="bi bi-x-circle"></i> Offline</span>
+                                {% endif %}
+                            </div>
+                            <div class="status-details">
+                                <p>Endpoint: {{ api_status.endpoint }}</p>
+                                {% if api_status.status == 'online' %}
+                                <p>Response Time: {{ api_status.response_time_ms|round|int }} ms</p>
+                                <p>Version: {{ api_status.version }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Web Status -->
+                        <div class="status-box">
+                            <h3 class="status-title">
+                                <i class="bi bi-browser-chrome"></i> Web Status
+                            </h3>
+                            <div class="status-value">
+                                <span class="badge badge-success"><i class="bi bi-check-circle"></i> Online</span>
+                            </div>
+                            <div class="status-details">
+                                <p>Python: {{ web_status.python_version.split(' ')[0] }}</p>
+                                <p>Platform: {{ web_status.platform.split('-')[0] }}</p>
+                                <p>Uptime: {{ web_status.uptime_formatted }}</p>
+                                <p>Requests served: {{ web_status.requests_served }}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- System Resources -->
+                        <div class="status-box">
+                            <h3 class="status-title">
+                                <i class="bi bi-cpu"></i> System Resources
+                            </h3>
+                            <div class="status-details">
+                                <div class="resource-item">
+                                    <div class="resource-label">
+                                        <span>CPU Usage</span>
+                                        <span class="resource-value">{{ diagnostic.cpu_percent }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ diagnostic.cpu_percent }}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="resource-item">
+                                    <div class="resource-label">
+                                        <span>Memory</span>
+                                        <span class="resource-value">{{ diagnostic.memory_usage_mb|round|int }} MB</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ (diagnostic.memory_usage_mb / 1000 * 100)|round|int }}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="resource-item">
+                                    <div class="resource-label">
+                                        <span>Disk</span>
+                                        <span class="resource-value">{{ diagnostic.disk_usage_percent }}%</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: {{ diagnostic.disk_usage_percent }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="api-details mb-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="bi bi-hdd-rack"></i> API Details</h2>
+                </div>
+                <div class="card-body">
+                    <pre class="code-block">{{ api_status | tojson(indent=2) }}</pre>
+                    
+                    <div class="mt-4">
+                        <h3>API Endpoints</h3>
+                        <ul class="list">
+                            <li><span class="badge badge-primary">GET</span> <code>/</code> - API root</li>
+                            <li><span class="badge badge-primary">GET</span> <code>/diagnostic</code> - API diagnostics</li>
+                            <li><span class="badge badge-primary">GET</span> <code>/models</code> - Available models</li>
+                            <li><span class="badge badge-success">POST</span> <code>/ask</code> - Submit questions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="web-details mb-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="bi bi-browser-chrome"></i> Web Application Details</h2>
+                </div>
+                <div class="card-body">
+                    <pre class="code-block">{{ web_status | tojson(indent=2) }}</pre>
+                    
+                    <div class="mt-4">
+                        <h3>Web Routes</h3>
+                        <ul class="list">
+                            <li><span class="badge badge-primary">GET</span> <code>/</code> - Home page</li>
+                            <li><span class="badge badge-primary">GET</span> <code>/status</code> - Status page</li>
+                            <li><span class="badge badge-success">POST</span> <code>/api/ask</code> - Question API proxy</li>
+                            <li><span class="badge badge-success">POST</span> <code>/api/feedback</code> - Response feedback</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="diagnostic-details mb-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="bi bi-tools"></i> Diagnostic Information</h2>
+                </div>
+                <div class="card-body">
+                    <pre class="code-block">{{ diagnostic | tojson(indent=2) }}</pre>
+                </div>
+                <div class="card-footer">
+                    <div class="flex justify-between items-center">
+                        <button id="refresh-btn" class="btn btn-outline">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                        </button>
+                        <div class="refresh-indicator">
+                            <div class="spinner-sm"></div>
+                            <div class="text-muted">
+                                <small id="refresh-countdown">Page auto-refreshes every 60 seconds</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-muted mt-2 text-center">
+                        <small>Last updated: {{ now }}</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="/" class="footer-link">Home</a>
+                <a href="/status" class="footer-link">System Status</a>
+                <a href="https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot" class="footer-link" target="_blank">GitHub</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 InsolvencyBot. This is a system monitoring page.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/status.js') }}"></script>
+</body>
+</html>

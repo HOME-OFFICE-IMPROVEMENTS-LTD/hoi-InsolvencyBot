@@ -1,0 +1,194 @@
+<!-- Enhanced version of index.html with modern UI -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsolvencyBot - Legal Guidance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <meta name="description" content="Get expert guidance on insolvency law with AI-powered responses backed by legislation, case law, and forms.">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="/" class="navbar-brand">
+                    <i class="bi bi-building"></i> InsolvencyBot
+                </a>
+                <ul class="navbar-nav">
+                    <li><a href="/" class="nav-link active">Home</a></li>
+                    <li><a href="/status" class="nav-link">Status</a></li>
+                    <li><a href="https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot" target="_blank" class="nav-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="intro mt-8 mb-8">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="text-center">Insolvency Law Guidance</h1>
+                    <p class="text-center">
+                        Ask questions about insolvency law and receive accurate guidance with references to legislation, cases, and forms.
+                    </p>
+                    
+                    <div class="api-status mt-2 text-center" id="api-status">
+                        <span class="status-indicator" id="status-dot"></span>
+                        <span id="status-text">Checking API connection...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="question-section">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Ask Your Question</h2>
+                </div>
+                <div class="card-body">
+                    <form id="questionForm">
+                        <div class="form-group">
+                            <label for="question">Your Question:</label>
+                            <textarea id="question" class="textarea" rows="4" placeholder="e.g., What happens if my company can't pay its debts?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Model:</label>
+                            <select id="model" class="select">
+                                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</option>
+                                <option value="gpt-4">GPT-4 (More accurate)</option>
+                                <option value="gpt-4o">GPT-4o (Latest model)</option>
+                            </select>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="bi bi-send"></i> Submit Question
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div class="loading mt-4 mb-4 text-center" id="loading">
+            <div class="spinner"></div>
+            <p class="mt-2">Processing your question...</p>
+        </div>
+
+        <div class="error alert alert-error" id="error">
+            <h3><i class="bi bi-exclamation-triangle"></i> Error</h3>
+            <p id="error-message">There was a problem processing your request.</p>
+        </div>
+
+        <section class="response-container mt-4" id="response-container" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Response</h2>
+                </div>
+                <div class="card-body">
+                    <div class="response-section" id="response-text"></div>
+                    
+                    <div class="response-metadata mt-3" id="response-metadata"></div>
+                    
+                    <div class="feedback-section mt-4">
+                        <p>Was this response helpful?</p>
+                        <div class="flex gap-2">
+                            <button class="btn btn-sm btn-outline" id="feedback-helpful">
+                                <i class="bi bi-hand-thumbs-up"></i> Helpful
+                            </button>
+                            <button class="btn btn-sm btn-outline" id="feedback-not-helpful">
+                                <i class="bi bi-hand-thumbs-down"></i> Not Helpful
+                            </button>
+                        </div>
+                        <div class="feedback-thanks mt-2" id="feedback-thanks" style="display: none;">
+                            Thank you for your feedback!
+                        </div>
+                    </div>
+
+                    <div class="citations-section mt-4">
+                        <h3>Citations</h3>
+                        
+                        <div class="mt-4">
+                            <h4><i class="bi bi-file-earmark-text"></i> Legislation</h4>
+                            <ul id="legislation-list" class="mt-2"></ul>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4><i class="bi bi-briefcase"></i> Cases</h4>
+                            <ul id="cases-list" class="mt-2"></ul>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4><i class="bi bi-file-earmark"></i> Forms</h4>
+                            <ul id="forms-list" class="mt-2"></ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-outline" id="new-question-btn">
+                        <i class="bi bi-plus-circle"></i> Ask Another Question
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="examples mt-8 mb-8">
+            <h2 class="text-center">Example Questions</h2>
+            
+            <div class="flex flex-wrap gap-4 mt-4">
+                <div class="card" style="flex: 1 0 300px;">
+                    <div class="card-body">
+                        <h3>Business Insolvency</h3>
+                        <ul>
+                            <li><a href="#" class="example-question">What happens if my company can't pay its debts?</a></li>
+                            <li><a href="#" class="example-question">Can I be personally liable for my limited company's debts?</a></li>
+                            <li><a href="#" class="example-question">What is the difference between liquidation and administration?</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card" style="flex: 1 0 300px;">
+                    <div class="card-body">
+                        <h3>Personal Insolvency</h3>
+                        <ul>
+                            <li><a href="#" class="example-question">What are my options if I can't pay my personal debts?</a></li>
+                            <li><a href="#" class="example-question">How does bankruptcy affect my credit score?</a></li>
+                            <li><a href="#" class="example-question">What is an Individual Voluntary Arrangement (IVA)?</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card" style="flex: 1 0 300px;">
+                    <div class="card-body">
+                        <h3>Creditor Questions</h3>
+                        <ul>
+                            <li><a href="#" class="example-question">How do I recover money from an insolvent company?</a></li>
+                            <li><a href="#" class="example-question">What rights do I have as a creditor in administration?</a></li>
+                            <li><a href="#" class="example-question">Can I issue a statutory demand for unpaid invoices?</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="/" class="footer-link">Home</a>
+                <a href="/status" class="footer-link">System Status</a>
+                <a href="https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot" class="footer-link" target="_blank">GitHub</a>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 InsolvencyBot. This is an AI assistant and does not provide legal advice.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

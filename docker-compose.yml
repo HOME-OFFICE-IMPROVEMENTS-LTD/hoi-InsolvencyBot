@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - INSOLVENCYBOT_API_KEY=${INSOLVENCYBOT_API_KEY}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    command: ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+    command: ["python", "app.py"]
+    depends_on:
+      - api
+      
+  cli:
+    build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./:/app
+    command: ["python", "cli.py"]
+
+  insolvency-bot:
+    build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+    command: python -m src.hoi_insolvencybot gpt-3.5-turbo test
