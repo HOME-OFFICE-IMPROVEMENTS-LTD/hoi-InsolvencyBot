@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hoi-insolvencybot"
+version = "0.1.0"
+description = "An AI-powered insolvency legal advice bot comparing multiple LLM models"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Home Office Improvements Ltd", email = "info@home-office-improvements.co.uk"}
+]
+maintainers = [
+    {name = "Home Office Improvements Ltd", email = "info@home-office-improvements.co.uk"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests",
+    "azure-storage-blob",
+    "numpy",
+    "openai",
+    "pandas",
+    "python-dotenv",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot"
+"Bug Tracker" = "https://github.com/HOME-OFFICE-IMPROVEMENTS-LTD/hoi-InsolvencyBot/issues"

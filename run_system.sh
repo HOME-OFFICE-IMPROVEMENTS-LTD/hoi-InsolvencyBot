@@ -29,8 +29,11 @@ export PORT=${PORT:-8000}  # API port
 export FLASK_PORT=${FLASK_PORT:-5000}  # Web interface port
 
 # Configure API URL for web interface
+export INSOLVENCYBOT_API_URL=${INSOLVENCYBOT_API_URL:-"http://localhost:$PORT"}
+export INSOLVENCYBOT_USE_ENHANCED_UI=${INSOLVENCYBOT_USE_ENHANCED_UI:-"true"}  # Use enhanced UI by default
 export INSOLVENCYBOT_API_URL="http://localhost:$PORT"
 echo -e "${GREEN}✓ API URL set to${NC} $INSOLVENCYBOT_API_URL"
+echo -e "${GREEN}✓ UI Mode:${NC} $([ "$INSOLVENCYBOT_USE_ENHANCED_UI" == "true" ] && echo "Enhanced Modern UI" || echo "Classic UI")"
 
 # Start API server in the background
 echo -e "\n${GREEN}Starting API server on port $PORT...${NC}"
