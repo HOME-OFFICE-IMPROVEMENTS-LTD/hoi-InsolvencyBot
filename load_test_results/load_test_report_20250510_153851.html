@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InsolvencyBot API Load Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .stats-container { display: flex; flex-wrap: wrap; }
+        .stat-box { 
+            flex: 1 0 200px; 
+            margin: 10px; 
+            padding: 15px; 
+            background-color: #f5f5f5; 
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-value { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .stat-label { color: #666; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .danger { color: #dc3545; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        .plot { margin: 20px 0; text-align: center; }
+        .plot img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>InsolvencyBot API Load Test Report</h1>
+        <p>Generated on 2025-05-10 15:38:50</p>
+        
+        <h2>Test Configuration</h2>
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">API URL</div>
+                <div class="stat-value">http://localhost:8000</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Concurrency</div>
+                <div class="stat-value">2</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Requests</div>
+                <div class="stat-value">4</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Model</div>
+                <div class="stat-value">gpt-3.5-turbo</div>
+            </div>
+        </div>
+        
+        <h2>Test Results</h2>
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-value danger">
+                    0.00%
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Average Response Time</div>
+                <div class="stat-value">
+                    0.01s
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">95th Percentile</div>
+                <div class="stat-value">
+                    0.02s
+                </div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Throughput</div>
+                <div class="stat-value">
+                    151.30 req/s
+                </div>
+            </div>
+        </div>
+        
+        <h2>Response Time Statistics</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Minimum Response Time</td>
+                <td>0.01s</td>
+            </tr>
+            <tr>
+                <td>Maximum Response Time</td>
+                <td>0.02s</td>
+            </tr>
+            <tr>
+                <td>Average Response Time</td>
+                <td>0.01s</td>
+            </tr>
+            <tr>
+                <td>Median Response Time</td>
+                <td>0.01s</td>
+            </tr>
+            <tr>
+                <td>95th Percentile Response Time</td>
+                <td>0.02s</td>
+            </tr>
+            <tr>
+                <td>99th Percentile Response Time</td>
+                <td>0.02s</td>
+            </tr>
+        </table>
+        
+        <h2>Visualizations</h2>
+        <div class="plot">
+            <h3>Response Time Distribution</h3>
+            <img src="response_time_histogram_20250510_153851.png" alt="Response Time Histogram">
+        </div>
+        <div class="plot">
+            <h3>Response Times Over Requests</h3>
+            <img src="response_time_scatter_20250510_153851.png" alt="Response Time Scatter Plot">
+        </div>
+        
+        <h2>Error Summary</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Successful Requests</td>
+                <td>0 (0.00%)</td>
+            </tr>
+            <tr>
+                <td>Failed Requests</td>
+                <td>4 (100.00%)</td>
+            </tr>
+        </table>
+        
+        <p>For detailed individual request data, please refer to the JSON results file.</p>
+    </div>
+</body>
+</html>

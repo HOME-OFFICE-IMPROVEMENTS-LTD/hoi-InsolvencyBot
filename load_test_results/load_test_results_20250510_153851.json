@@ -1,0 +1,68 @@
+{
+  "test_info": {
+    "api_url": "http://localhost:8000",
+    "concurrency": 2,
+    "num_requests": 4,
+    "model": "gpt-3.5-turbo",
+    "timestamp": "2025-05-10 15:38:50"
+  },
+  "statistics": {
+    "total_requests": 4,
+    "successful_requests": 0,
+    "failed_requests": 4,
+    "success_rate": 0.0,
+    "avg_response_time": 0.013218581676483154,
+    "min_response_time": 0.009446382522583008,
+    "max_response_time": 0.018471956253051758,
+    "median_response_time": 0.012477993965148926,
+    "p95_response_time": 0.017757880687713622,
+    "p99_response_time": 0.01832914113998413,
+    "throughput": 151.3021630420569
+  },
+  "raw_data": {
+    "response_times": [
+      0.018471956253051758,
+      0.01371145248413086,
+      0.011244535446166992,
+      0.009446382522583008
+    ],
+    "responses": [
+      {
+        "question": "How do I know if my company is insolvent?",
+        "response": {
+          "error": "API returned status code 500",
+          "response": "Internal Server Error"
+        },
+        "time": 0.018471956253051758,
+        "success": false
+      },
+      {
+        "question": "What happens if my company can't pay its debts?",
+        "response": {
+          "error": "API returned status code 500",
+          "response": "Internal Server Error"
+        },
+        "time": 0.01371145248413086,
+        "success": false
+      },
+      {
+        "question": "What is a company voluntary arrangement?",
+        "response": {
+          "error": "API returned status code 500",
+          "response": "Internal Server Error"
+        },
+        "time": 0.011244535446166992,
+        "success": false
+      },
+      {
+        "question": "What is the difference between liquidation and administration?",
+        "response": {
+          "error": "API returned status code 500",
+          "response": "Internal Server Error"
+        },
+        "time": 0.009446382522583008,
+        "success": false
+      }
+    ]
+  }
+}

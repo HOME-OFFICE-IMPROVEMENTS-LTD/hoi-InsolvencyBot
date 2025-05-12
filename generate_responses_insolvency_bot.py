@@ -14,7 +14,7 @@ import traceback
 import pandas as pd
 import requests
 sys.path.append("../insolvency/")
-from insolvency_bot import answer_question
+from src.hoi_insolvencybot.insolvency_bot import answer_question
 
 SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
