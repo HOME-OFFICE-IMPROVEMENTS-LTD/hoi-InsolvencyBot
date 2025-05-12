@@ -1,0 +1,32 @@
+
+InsolvencyBot Test Report
+=========================
+Date: 2025-05-10 02:37:55
+Duration: 0.85 seconds
+
+Summary:
+- Tests run: 6
+- Errors: 0
+- Failures: 0
+- Skipped: 0
+
+Details:
+
+Full Output:
+test_answer_question_basic (test_insolvency_bot.TestInsolvencyBot.test_answer_question_basic)
+Test basic functionality of answer_question with a mocked response. ... ok
+test_answer_question_error_handling (test_insolvency_bot.TestInsolvencyBot.test_answer_question_error_handling)
+Test that the answer_question function handles errors gracefully. ... ok
+test_answer_question_format (test_insolvency_bot.TestInsolvencyBot.test_answer_question_format)
+Test that the answer_question function returns properly formatted responses. ... ok
+test_model_selection (test_insolvency_bot.TestInsolvencyBot.test_model_selection)
+Test that different models can be selected. ... ok
+test_command_line_validation (test_integration.TestMainApp.test_command_line_validation)
+Test that the main function validates command line arguments. ... ok
+test_openai_key_validation (test_integration.TestMainApp.test_openai_key_validation)
+Test that the main function validates the OPENAI_API_KEY. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.005s
+
+OK

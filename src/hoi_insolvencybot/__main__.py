@@ -1,10 +1,10 @@
-'''
-Run all train or test questions through Insolvency Bot
+"""
+Main entry point for running all train or test questions through Insolvency Bot.
 
 Usage: python -m hoi_insolvencybot gpt-3.5-turbo|gpt-4|gpt-4o train|test
 
 Make sure OPENAI_API_KEY is set in your environment.
-'''
+"""
 
 import os
 import re
@@ -12,18 +12,27 @@ import sys
 import time
 import traceback
 import pandas as pd
-from hoi_insolvencybot.insolvency_bot import answer_question
+from src.hoi_insolvencybot.insolvency_bot import answer_question
+from src.hoi_insolvencybot.logging_config import setup_logging, get_logger
+
+# Set up logging
+setup_logging()
+logger = get_logger(__name__)
 
 SUPPORTED_MODELS = {'gpt-3.5-turbo', 'gpt-4', 'gpt-4o'}
 SUPPORTED_MODELS_CONCAT = '|'.join(SUPPORTED_MODELS)
 COMMAND_LINE_PARAM = f"Usage: python -m hoi_insolvencybot {SUPPORTED_MODELS_CONCAT} train|test"
 
 def main():
+    logger.info("Starting InsolvencyBot")
+    
     if len(sys.argv) != 3:
+        logger.error("Invalid command line arguments")
         print(COMMAND_LINE_PARAM)
         sys.exit(1)
 
     if not os.environ.get("OPENAI_API_KEY"):
+        logger.error("OPENAI_API_KEY environment variable not set")
         print("Please set the environment variable OPENAI_API_KEY.")
         sys.exit(1)
 
@@ -31,14 +40,23 @@ def main():
     mode = sys.argv[2]
 
     if model not in SUPPORTED_MODELS:
+        logger.error(f"Unsupported model: {model}")
         print(COMMAND_LINE_PARAM)
         print("Supported models:", ", ".join(SUPPORTED_MODELS))
         sys.exit(1)
 
+    logger.info(f"Processing dataset: {mode} using model: {model}")
     print(f"Processing dataset: {mode} using model: {model}")
 
     input_file = f"data/{mode}_questions.csv"
+    if not os.path.exists(input_file):
+        logger.error(f"Input file not found: {input_file}")
+        print(f"Error: Input file not found: {input_file}")
+        sys.exit(1)
+        
+    logger.info(f"Loading questions from {input_file}")
     df = pd.read_csv(input_file, sep="\t", encoding="utf-8")
+    logger.info(f"Loaded {len(df)} questions")
 
     bot_responses = [""] * len(df)
     bot_times = [0] * len(df)

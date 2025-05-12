@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>InsolvencyBot Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        .summary { background-color: #f4f4f4; padding: 15px; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .details { margin-top: 20px; }
+        pre { background-color: #f9f9f9; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>InsolvencyBot Test Report</h1>
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Date: 2025-05-10 02:37:55</p>
+        <p>Duration: 0.85 seconds</p>
+        <p>Tests run: 6</p>
+        <p class="success">Errors: 0</p>
+        <p class="success">Failures: 0</p>
+        <p>Skipped: 0</p>
+    </div>
+    
+    <div class="details">
+        <h2>Details</h2>
+        <pre>test_answer_question_basic (test_insolvency_bot.TestInsolvencyBot.test_answer_question_basic)
+Test basic functionality of answer_question with a mocked response. ... ok
+test_answer_question_error_handling (test_insolvency_bot.TestInsolvencyBot.test_answer_question_error_handling)
+Test that the answer_question function handles errors gracefully. ... ok
+test_answer_question_format (test_insolvency_bot.TestInsolvencyBot.test_answer_question_format)
+Test that the answer_question function returns properly formatted responses. ... ok
+test_model_selection (test_insolvency_bot.TestInsolvencyBot.test_model_selection)
+Test that different models can be selected. ... ok
+test_command_line_validation (test_integration.TestMainApp.test_command_line_validation)
+Test that the main function validates command line arguments. ... ok
+test_openai_key_validation (test_integration.TestMainApp.test_openai_key_validation)
+Test that the main function validates the OPENAI_API_KEY. ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.005s
+
+OK
+</pre>
+    </div>
+</body>
+</html>

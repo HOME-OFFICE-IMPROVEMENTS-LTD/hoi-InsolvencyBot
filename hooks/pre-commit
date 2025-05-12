@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Pre-commit hook for InsolvencyBot
+# Copy this file to .git/hooks/pre-commit to enable
+#
+# This hook runs various checks before committing:
+# - Linting with flake8
+# - Format checking with black
+# - Unit tests
+#
+# Bypass with: git commit --no-verify
+
+echo "Running pre-commit checks..."
+
+# Store current staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$')
+if [ -z "$staged_files" ]; then
+    echo "No Python files to check. Skipping pre-commit hook."
+    exit 0
+fi
+
+# Run flake8
+echo "Running flake8..."
+if ! flake8 $staged_files; then
+    echo "❌ flake8 failed. Fix the issues before committing."
+    exit 1
+fi
+echo "✅ flake8 passed."
+
+# Run black in check mode
+echo "Checking code formatting with black..."
+if ! black --check $staged_files; then
+    echo "❌ black check failed. Run 'black' to format your code before committing."
+    exit 1
+fi
+echo "✅ black check passed."
+
+# Run tests
+echo "Running tests..."
+if ! PYTHONPATH=. python -m unittest discover -s tests; then
+    echo "❌ Tests failed. Fix the failing tests before committing."
+    exit 1
+fi
+echo "✅ Tests passed."
+
+echo "All checks passed! 🎉"
+exit 0
